@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Button, Text } from 'react-native';
 import { createBottomTabNavigator, SafeAreaView } from 'react-navigation';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 // import BraintreeDropIn from 'react-native-braintree-dropin-ui';
 

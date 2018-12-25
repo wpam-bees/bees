@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import { View, Text, Button } from 'react-native';
 
-export default class ListScreen extends Component {
+export default class LocationChooser extends Component {
     static navigationOptions = ({ navigation }) => {
         return {
-            headerTitle: "Your jobs",
+            headerTitle: "Choose location",
             headerRight: (
                 <Button
-                    title="Add"
+                    title="Choose"
                     // color="#00F"
                     onPress={() => navigation.navigate('NewJob')}
                 />
@@ -18,7 +18,7 @@ export default class ListScreen extends Component {
     render() {
         return (
             <View>
-                <Text>ListScreen</Text>
+                <Text>LocationChooser</Text>
             </View>
         )
     }
