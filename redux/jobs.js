@@ -1,29 +1,29 @@
 import { api } from '../App';
+import { store } from './index';
 
 import { fetchUser } from './user';
 
 const SET_JOBS = 'SET_JOBS';
+const ADD_JOB = 'ADD_JOB';
 const SET_ACTIVE_JOBS = 'SET_ACTIVE_JOBS';
-const MAKE_ACTIVE = 'MAKE_ACTIVE';
+const ACCEPT_FINISHED = 'ACCEPT_FINISHED';
 const REMOVE_JOB = 'REMOVE_JOB';
 const FETCH = 'FETCH';
 const FETCH_FAIL = 'FETCH_FAIL';
 
-export default function reducer(state = { available: [], active: [] }, action) {
+export default function reducer(state = { past: [], active: [], isLoading: false }, action) {
     switch (action.type) {
         case SET_JOBS:
-            return { ...state, available: [...action.payload.jobs], isLoading: false };
+            return { ...state, past: [...action.payload.jobs], isLoading: false };
+        case ADD_JOB:
+            return { ...state, active: [action.payload.job, ...state.active], isLoading: false };
         case SET_ACTIVE_JOBS:
-            return { ...state, active: [...action.payload.jobs] };
-        case MAKE_ACTIVE:
+            return { ...state, active: [...action.payload.jobs], isLoading: false };
+        case ACCEPT_FINISHED:
             return {
-                available: state.available.filter(job => job.id !== action.payload.job.id),
-                active: [...state.active, action.payload.job],
-            };
-        case REMOVE_JOB:
-            return {
-                available: state.available.filter(job => job.id !== action.payload.job.id),
+                past: {...state, past: [action.payload.job, ...state.past]},
                 active: state.active.filter(job => job.id !== action.payload.job.id),
+                isLoading: false,
             };
         case FETCH:
             return { ...state, isLoading: true };
@@ -43,6 +43,16 @@ function setJobs(jobs) {
     };
 }
 
+function addNewJob(job) {
+    return {
+        type: ADD_JOB,
+        payload: {
+            job,
+        },
+    };
+}
+
+
 function setActiveJobs(jobs) {
     return {
         type: SET_ACTIVE_JOBS,
@@ -52,30 +62,21 @@ function setActiveJobs(jobs) {
     };
 }
 
-function removeJob(job) {
+function _acceptFinished(job) {
     return {
-        type: REMOVE_JOB,
+        type: ACCEPT_FINISHED,
         payload: {
             job,
         },
     };
 }
 
-function makeActive(job) {
-    return {
-        type: MAKE_ACTIVE,
-        payload: {
-            job,
-        },
-    };
-}
-
-export function fetchNearbyJobs() {
+export function addJob(job) {
     return async (dispatch) => {
         dispatch({ type: FETCH });
         try {
-            const resp = await api.get('/api/bees/job/nearby/');
-            dispatch(setJobs(resp.data));
+            const resp = await api.post('/api/bees/job/', job);
+            dispatch(addNewJob(resp.data));
         } catch (e) {
             console.warn(e);
             dispatch({ type: FETCH_FAIL });
@@ -87,8 +88,44 @@ export function fetchActiveJobs() {
     return async (dispatch) => {
         dispatch({ type: FETCH });
         try {
-            const resp = await api.get('/api/bees/job/active/');
+            const resp = await api.get('/api/bees/job/', {
+                params: {
+                    principal: store.getState().user.employer_bee,
+                    finished: false,
+                },
+            });
             dispatch(setActiveJobs(resp.data));
+        } catch (e) {
+            console.warn(e);
+            dispatch({ type: FETCH_FAIL });
+        }
+    };
+}
+
+export function fetchPastJobs() {
+    return async (dispatch) => {
+        dispatch({ type: FETCH });
+        try {
+            const resp = await api.get('/api/bees/job/', {
+                params: {
+                    principal__user: store.getState().user.id,
+                    finished: true,
+                },
+            });
+            dispatch(setJobs(resp.data));
+        } catch (e) {
+            console.warn(e);
+            dispatch({ type: FETCH_FAIL });
+        }
+    };
+}
+
+export function deleteJob(job) {
+    return async (dispatch) => {
+        dispatch({ type: FETCH });
+        try {
+            const resp = await api.delete(`/api/bees/job/${job.id}/`);
+            dispatch(removeJob(job));
         } catch (e) {
             console.warn(e);
             dispatch({ type: FETCH_FAIL });
@@ -99,24 +136,8 @@ export function fetchActiveJobs() {
 export function markFinished(job) {
     return async (dispatch) => {
         try {
-            const resp = await api.post(`/api/bees/job/${job.id}/finish/`);
-            if (resp.data.finished) {
-                dispatch(removeJob(resp.data));
-                dispatch(fetchUser());
-            }
-            return resp.data;
-        } catch (e) {
-            console.warn(e);
-        }
-        return null;
-    };
-}
-
-export function markAccepted(job) {
-    return async (dispatch) => {
-        try {
-            const resp = await api.post(`/api/bees/job/${job.id}/accept/`);
-            await dispatch(makeActive(resp.data));
+            const resp = await api.post(`/api/bees/job/${job.id}/accept_finished/`);
+            dispatch(_acceptFinished(job));
             return resp.data;
         } catch (e) {
             console.warn(e);

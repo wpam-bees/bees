@@ -25,7 +25,6 @@ class AuthScreen extends Component {
         if (token) {
             await fetchUser();
         }
-        this.props.navigation.navigate('App');
         this.props.navigation.navigate(token ? 'App' : 'Login'); // eslint-disable-line react/prop-types
     }
 

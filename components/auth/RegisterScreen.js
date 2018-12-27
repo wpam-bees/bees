@@ -11,61 +11,6 @@ import { setToken } from '../../redux/auth';
 
 import { beesBackground, honeyYellow, appleRed } from '../../assets';
 
-const requiredValidator = {
-    validator: (args) => {
-        if (!args || args[0] === undefined) {
-            return false;
-        }
-        return true;
-    },
-    message: '{TITLE} is required',
-};
-
-const formValidators = {
-    username: {
-        title: 'Username',
-        validate: [
-            requiredValidator,
-            {
-                validator: 'isLength',
-                arguments: [3, 32],
-                message: '{TITLE} must be between {ARGS[0]} and {ARGS[1]} characters',
-            },
-        ],
-    },
-    firstName: {
-        title: 'First name',
-        validate: [requiredValidator],
-    },
-    lastName: {
-        title: 'Last name',
-        validate: [requiredValidator],
-    },
-    email: {
-        title: 'Email',
-        validate: [
-            requiredValidator,
-            { validator: 'isEmail' },
-        ],
-    },
-    password: {
-        title: 'Password',
-        validate: [requiredValidator],
-    },
-    password2: {
-        validate: [
-            {
-                validator: (...args) => {
-                    if (args[0] === GiftedFormManager.getValue('registerForm', 'password')) {
-                        return true;
-                    }
-                    return false;
-                },
-                message: 'Passwords must be the same',
-            },
-        ],
-    },
-};
 
 const SignupSchema = Yup.object().shape({
     username: Yup.string()
@@ -111,7 +56,7 @@ class RegisterScreen extends Component {
             );
             setToken(resp.data);
             this.setState({ isLoading: false });
-            navigation.navigate('SettingsGroups');
+            navigation.navigate('App');
         } catch (e) {
             console.error(e)
             const errors = e.response.data;

@@ -1,18 +1,14 @@
 import { api } from '../App';
 
-import { fetchNearbyJobs } from './jobs';
-
 const SET_GROUPS = 'SET_GROUPS';
-const SET_ACTIVE = 'SET_ACTIVE';
+const ADD_GROUP = 'ADD_GROUP';
 
 export default function reducer(state = [], action) {
     switch (action.type) {
         case SET_GROUPS:
             return [...action.payload.groups];
-        case SET_ACTIVE:
-            return state.map((group) => {
-                return group.id === action.payload.group.id ? { ...group, active: action.payload.value } : group;
-            });
+        case ADD_GROUP:
+            return [action.payload.group, ...state];
         default:
             return state;
     }
@@ -27,12 +23,11 @@ function setGroups(groups) {
     };
 }
 
-function setGroupActive(group, value) {
+function addNewGroup(group) {
     return {
-        type: SET_ACTIVE,
+        type: ADD_GROUP,
         payload: {
             group,
-            value,
         },
     };
 }
@@ -48,16 +43,11 @@ export function fetchGroups() {
     };
 }
 
-export function toggleGroup(group, value) {
+export function addGroup(data) {
     return async (dispatch) => {
-        dispatch(setGroupActive(group, value));
         try {
-            const resp = await api.post(
-                `/api/bees/category/${group.id}/mark_interest/`,
-                { interested: value },
-            );
-            await dispatch(setGroupActive(group, resp.data));
-            await dispatch(fetchNearbyJobs());
+            const resp = await api.post('/api/bees/category/', data);
+            await dispatch(addNewGroup(resp.data));
         } catch (e) {
             console.warn(e);
         }

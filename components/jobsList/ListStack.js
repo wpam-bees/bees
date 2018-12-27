@@ -1,13 +1,52 @@
-import { createStackNavigator } from 'react-navigation';
+import React, { Component } from 'react';
+import { Button } from 'react-native';
+import { createBottomTabNavigator } from 'react-navigation';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
-import ListScreen from './ListScreen';
-import NewJob from './NewJob';
-import LocationChooser from './LocationChooser';
+import ActiveJobs from './ActiveJobs';
+import PastJobs from './PastJobs';
 
-export default createStackNavigator(
+
+const Navigation = createBottomTabNavigator(
     {
-        ListScreen,
-        NewJob,
-        LocationChooser,
+        'Active Jobs': ActiveJobs,
+        'Past Jobs': PastJobs,
+    },
+    {
+        navigationOptions: ({ navigation }) => ({
+            tabBarIcon: ({ tintColor }) => {
+                const { routeName } = navigation.state;
+                let iconName;
+                if (routeName === 'Active Jobs') {
+                    iconName = 'list-ul';
+                } else if (routeName === 'Past Jobs') {
+                    iconName = 'check-square';
+                }
+
+                return <FontAwesome name={iconName} size={20} color={tintColor} />;
+            },
+        }),
     },
 );
+
+export default class ListStack extends Component {
+    static router = Navigation.router;
+    static navigationOptions = ({ navigation }) => {
+        return {
+            headerTitle: "Jobs",
+            headerRight: (
+                <Button
+                    title="Add"
+                    onPress={() => navigation.navigate('NewJob')}
+                />
+            ),
+        };
+    };
+
+    render() {
+        const { navigation } = this.props;
+        return (
+            <Navigation navigation={navigation} />
+        );
+    }
+}

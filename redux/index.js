@@ -8,14 +8,12 @@ import AuthReducer from './auth';
 import User from './user';
 import Jobs from './jobs';
 import Groups from './groups';
-import Settings from './settings';
 
 const reducers = combineReducers({
     auth: persistReducer({ key: 'beesAuth', storage }, AuthReducer),
     user: User,
     jobs: Jobs,
     groups: Groups,
-    settings: Settings,
 });
 
 export const store = createStore(

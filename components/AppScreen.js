@@ -1,35 +1,29 @@
 import React, { Component } from 'react';
-import { StyleSheet, Button, Text } from 'react-native';
-import { createBottomTabNavigator, SafeAreaView } from 'react-navigation';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { StyleSheet } from 'react-native';
+import { SafeAreaView, createStackNavigator } from 'react-navigation';
 
 // import BraintreeDropIn from 'react-native-braintree-dropin-ui';
 
+import LocationWatcher from './LocationWatcher';
+
 import ListStack from './jobsList/ListStack';
 
+import NewJob from './newJob/NewJob';
+import LocationChooser from './newJob/LocationChooser';
+import CategoryChooser from './category/CategoryChooser';
+import JobPreview from './jobsList/JobPreview';
 
-const Nav = createBottomTabNavigator(
-    {
-        List: ListStack,
-    },
-    {
-        navigationOptions: ({ navigation }) => ({
-            tabBarIcon: ({ tintColor }) => {
-                const { routeName } = navigation.state;
-                let iconName;
-                if (routeName === 'Map') {
-                    iconName = 'map';
-                } else if (routeName === 'List') {
-                    iconName = 'list-ul';
-                } else if (routeName === 'Settings') {
-                    iconName = 'wrench';
-                }
 
-                return <FontAwesome name={iconName} size={20} color={tintColor} />;
-            },
-        }),
+const Nav = createStackNavigator(
+    {
+        ListStack,
+        NewJob,
+        LocationChooser,
+        CategoryChooser,
+        JobPreview,
     },
 );
+
 
 export default class AppScreen extends Component {
     static router = Nav.router;
@@ -53,12 +47,8 @@ export default class AppScreen extends Component {
         const { navigation } = this.props;
         return (
             <SafeAreaView style={StyleSheet.absoluteFill}>
-                {/* <Text>Welcome to Bees app</Text>
-                <Button
-                    title="Make a payment"
-                    onPress={this.pay}
-                /> */}
                 <Nav navigation={navigation} />
+                <LocationWatcher />
             </SafeAreaView>
         );
     }
