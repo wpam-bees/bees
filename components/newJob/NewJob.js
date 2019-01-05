@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
-import { View, StyleSheet, TextInput, Button } from 'react-native';
+import { View, StyleSheet, TextInput, Button, ActivityIndicator } from 'react-native';
 import { Formik } from 'formik';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { Divider, ListItem } from 'react-native-elements';
 import * as Yup from 'yup';
+import BraintreeDropIn from 'react-native-braintree-dropin-ui';
 
 import { connect } from 'react-redux';
 
 import { appleRed, backgroundColor } from '../../assets';
+import { api } from '../../App';
 
 import { addJob } from '../../redux/jobs';
 
@@ -29,17 +31,19 @@ const FormSchema = Yup.object().shape({
 class NewJob extends Component {
     static navigationOptions = ({ navigation }) => {
         const { params = {
-            submit: () => { }
+            submit: () => { },
         } } = navigation.state
 
         return {
             headerTitle: "New job",
-            headerRight: (
-                <Button
-                    title="Save"
-                    onPress={params.submit}
-                />
-            ),
+            headerRight: params.loading
+                ? <ActivityIndicator style={styles.buttonLoading} />
+                : (
+                    <Button
+                        title="Save"
+                        onPress={params.submit}
+                    />
+                ),
         };
     };
 
@@ -50,23 +54,49 @@ class NewJob extends Component {
     }
 
     locationToGeoJSON = (location) => {
-        return {
-            type: 'POINT',
-            coordinates: [location.latitude, location.longitude],
-        };
+        if (location !== null) {
+            return {
+                type: 'POINT',
+                coordinates: [location.latitude, location.longitude],
+            };
+        }
+        return null;
     }
 
     add = async (values) => {
+        this.props.navigation.setParams({
+            loading: true,
+        })
         const { addJob } = this.props;
-        console.warn(values);
-        await addJob({
-            ...values,
-            category: values.category.id,
-            location: this.locationToGeoJSON(values.location),
-        });
-        this.props.navigation.goBack();
+        const result = await this.pay(Number(values.initial_fee));
+        if (result) {
+            await addJob({
+                ...values,
+                category: values.category.id,
+                location: this.locationToGeoJSON(values.location),
+                nonce: result.nonce,
+            });
+            this.props.navigation.goBack();
+        }
+        this.props.navigation.setParams({
+            loading: false,
+        })
     }
 
+    pay = async (price) => {
+        try {
+            const clientToken = await api.get('/api/bees/braintree/token/');
+            console.warn(clientToken.data);
+            const result = await BraintreeDropIn.show({
+                clientToken: clientToken.data,
+                orderTotal: price,
+                vaultManager: true,
+            });
+            return result;
+        } catch (error) {
+            return null;
+        }
+    }
 
     render() {
         const { navigation } = this.props;
@@ -201,6 +231,9 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: appleRed,
         fontWeight: 'normal',
+    },
+    buttonLoading: {
+        paddingHorizontal: 15,
     }
 });
 

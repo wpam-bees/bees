@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, ScrollView, StyleSheet, Text, Button } from 'react-native';
+import { View, ScrollView, StyleSheet, Text, Button, ActivityIndicator } from 'react-native';
 import { Divider, ListItem } from 'react-native-elements';
 
 import { connect } from 'react-redux';
@@ -12,7 +12,7 @@ import { appleRed } from '../../assets';
 class JobPreview extends Component {
     static navigationOptions = ({ navigation }) => {
         const { params = {
-            finish: () => {},
+            finish: () => { },
         } } = navigation.state;
         const job = navigation.state.params.job;
 
@@ -22,12 +22,20 @@ class JobPreview extends Component {
                 ? (
                     <Button
                         title="Finish"
-                        onPress={params.finish || (() => {})}
+                        onPress={params.finish || (() => { })}
                     />
                 )
                 : null,
         };
     };
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            isLoading: false,
+        };
+    }
 
     componentDidMount() {
         this.props.navigation.setParams({
@@ -43,7 +51,9 @@ class JobPreview extends Component {
 
     delete = async () => {
         const { navigation, deleteJob } = this.props;
+        this.setState({ isLoading: true });
         await deleteJob(navigation.state.params.job);
+        this.setState({ isLoading: false });
         navigation.goBack();
     }
 
@@ -108,7 +118,7 @@ class JobPreview extends Component {
                         : null
                 }
                 {
-                    job.status === 'Awaiting for worker'
+                    job.status === 'Awaiting for worker' && !this.state.isLoading
                         ? (<View>
                             <Divider style={styles.divider} />
                             <Divider />
@@ -124,6 +134,16 @@ class JobPreview extends Component {
                             />
                             <Divider />
                         </View>)
+                        : null
+                }
+                {
+                    this.state.isLoading
+                        ? (
+                            <View>
+                                <Divider style={styles.divider} />
+                                <ActivityIndicator size="large" />
+                            </View>
+                        )
                         : null
                 }
             </ScrollView>

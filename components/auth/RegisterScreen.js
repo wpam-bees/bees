@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 
 import { api } from '../../App';
 import { setToken } from '../../redux/auth';
+import { fetchUser } from '../../redux/user';
 
 import { beesBackground, honeyYellow, appleRed } from '../../assets';
 
@@ -47,7 +48,7 @@ class RegisterScreen extends Component {
     }
 
     register = async (values) => {
-        const { setToken, navigation } = this.props;
+        const { setToken, navigation, fetchUser } = this.props;
         try {
             this.setState({ isLoading: true });
             const resp = await api.post(
@@ -55,6 +56,7 @@ class RegisterScreen extends Component {
                 { ...values },
             );
             setToken(resp.data);
+            fetchUser();
             this.setState({ isLoading: false });
             navigation.navigate('App');
         } catch (e) {
@@ -227,6 +229,7 @@ const styles = StyleSheet.create({
 
 const mapDispatchToProps = {
     setToken,
+    fetchUser,
 };
 
 export default connect(null, mapDispatchToProps)(RegisterScreen);

@@ -1,5 +1,4 @@
 export const beesBackground = require('./background-bees-dimmed.jpg'); // eslint-disable-line global-require
-export const currentLocation = require('./current-location.png'); // eslint-disable-line global-require
 
 export const honeyYellow = '#C7951F';
 export const black = '#000000';

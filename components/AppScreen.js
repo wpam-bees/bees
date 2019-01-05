@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import { StyleSheet } from 'react-native';
 import { SafeAreaView, createStackNavigator } from 'react-navigation';
 
-// import BraintreeDropIn from 'react-native-braintree-dropin-ui';
-
 import LocationWatcher from './LocationWatcher';
 
 import ListStack from './jobsList/ListStack';
@@ -27,21 +25,6 @@ const Nav = createStackNavigator(
 
 export default class AppScreen extends Component {
     static router = Nav.router;
-
-    pay = () => {
-        // BraintreeDropIn.show({
-        //     clientToken: 'sandbox_w7xcgt6d_cwsft3vzjpgfjptf',
-        //     orderTotal: 112.0,
-        // })
-        //     .then(result => console.warn(result))
-        //     .catch((error) => {
-        //         if (error.code === 'USER_CANCELLATION') {
-        //             console.warn('cnacel');
-        //         } else {
-        //             console.warn(error);
-        //         }
-        //     });
-    }
 
     render() {
         const { navigation } = this.props;

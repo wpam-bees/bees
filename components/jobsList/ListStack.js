@@ -40,6 +40,13 @@ export default class ListStack extends Component {
                     onPress={() => navigation.navigate('NewJob')}
                 />
             ),
+            headerLeft: (
+                <Button
+                    title="Log Out"
+                    onPress={() => navigation.navigate('Logout')}
+                    color="red"
+                />
+            ),
         };
     };
 

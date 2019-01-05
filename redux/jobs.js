@@ -7,7 +7,7 @@ const SET_JOBS = 'SET_JOBS';
 const ADD_JOB = 'ADD_JOB';
 const SET_ACTIVE_JOBS = 'SET_ACTIVE_JOBS';
 const ACCEPT_FINISHED = 'ACCEPT_FINISHED';
-const REMOVE_JOB = 'REMOVE_JOB';
+const DELETE_JOB = 'DELETE_JOB';
 const FETCH = 'FETCH';
 const FETCH_FAIL = 'FETCH_FAIL';
 
@@ -21,10 +21,16 @@ export default function reducer(state = { past: [], active: [], isLoading: false
             return { ...state, active: [...action.payload.jobs], isLoading: false };
         case ACCEPT_FINISHED:
             return {
-                past: {...state, past: [action.payload.job, ...state.past]},
+                past: [action.payload.job, ...state.past],
                 active: state.active.filter(job => job.id !== action.payload.job.id),
                 isLoading: false,
             };
+        case DELETE_JOB:
+            return {
+                ...state,
+                active: state.active.filter(job => job.id !== action.payload.job.id),
+                isLoading: false,
+            }
         case FETCH:
             return { ...state, isLoading: true };
         case FETCH_FAIL:
@@ -65,6 +71,15 @@ function setActiveJobs(jobs) {
 function _acceptFinished(job) {
     return {
         type: ACCEPT_FINISHED,
+        payload: {
+            job,
+        },
+    };
+}
+
+function _deleteJob(job) {
+    return {
+        type: DELETE_JOB,
         payload: {
             job,
         },
@@ -125,7 +140,7 @@ export function deleteJob(job) {
         dispatch({ type: FETCH });
         try {
             const resp = await api.delete(`/api/bees/job/${job.id}/`);
-            dispatch(removeJob(job));
+            dispatch(_deleteJob(job));
         } catch (e) {
             console.warn(e);
             dispatch({ type: FETCH_FAIL });

@@ -13,6 +13,7 @@ import { Formik } from 'formik';
 import { connect } from 'react-redux';
 
 import { setToken } from '../../redux/auth';
+import { fetchUser } from '../../redux/user';
 import { api } from '../../App';
 import {
     beesBackground,
@@ -32,13 +33,14 @@ class LoginScreen extends Component {
     }
 
     login = async (data) => {
-        const { navigate } = this.props.navigation; // eslint-disable-line react/prop-types
+        const { navigation, setToken, fetchUser } = this.props; // eslint-disable-line react/prop-types
         try {
             this.setState({ isLoading: true });
             const resp = await api.post('/api/auth/token/', data);
-            this.props.setToken(resp.data.token);
+            setToken(resp.data.token);
+            await fetchUser();
             this.setState({ isLoading: false });
-            navigate('App');
+            navigation.navigate('App');
         } catch (e) {
             const errors = e.response.data;
             Object.keys(errors).forEach((k) => { errors[k] = errors[k][0]; });
@@ -167,6 +169,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = {
     setToken,
+    fetchUser,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(LoginScreen);
